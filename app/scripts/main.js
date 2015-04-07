@@ -1,6 +1,8 @@
 //Login User
+easyrtc.setSocketUrl('http://loyolalawtech.org:8080');
 var ref = new Firebase('https://dazzling-torch-5906.firebaseio.com'),
-stream, 
+stream,
+
 checkAuth = function () {
     var authData = ref.getAuth();
     if (authData){
@@ -43,24 +45,39 @@ setNav = function (index) {
 },
 
 startVideo = function () {
-    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
-    navigator.getUserMedia({video:true,audio:true}, 
-        function(localMediaStream){
-                stream = localMediaStream;
-                var video = document.querySelector('video');
-                video.src = window.URL.createObjectURL(localMediaStream);
-                video.onloadedmetadata = function(e) {
-                    video.play();
-                };
-            }, 
-        function (e){
-            console.log('error'); 
-        });
-
+    //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
+    //navigator.getUserMedia({video:true,audio:true},
+    //    function(localMediaStream){
+    //            stream = localMediaStream;
+    //            var video = document.querySelector('video');
+    //            video.src = window.URL.createObjectURL(localMediaStream);
+    //            video.onloadedmetadata = function(e) {
+    //                video.play();
+    //            };
+    //        },
+    //    function (e){
+    //        console.log('error');
+    //    });
+    //easyrtc.setRoomOccupantListener( convertListToButtons);
+    easyrtc.initMediaSource(function(){
+        var selfVideo = document.getElementById('self');
+        easyrtc.setVideoObjectSrc(selfVideo, easyrtc.getLocalStream());
+        easyrtc.connect('receptionista', 
+            function (easyrtcid){
+                console.log('success: ' + easyrtcid); 
+            },
+            function(errorCode,msg){
+                console.log('fail: ' + msg);
+            });
+        }
+    );
 },
 
 stopVideo = function () {
-    stream.stop();
+    //stream.stop();
+    easyrtc.clearMediaStream( document.getElementById('self'));
+    easyrtc.setVideoObjectSrc(document.getElementById('self'),'');
+    easyrtc.closeLocalMediaStream();
 
 }
 
@@ -84,6 +101,7 @@ Path.map('#/main/index').to(function() {
 
 Path.map('#/main/desk').to(function() {
     $('.content').html(Handlebars.templates.desk);
+    startVideo();
 });
 
 Path.map('#/main/target').to(function() {
