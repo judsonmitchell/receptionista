@@ -6,6 +6,10 @@
     "modernizr": "~2.8.2",
     "bootswatch-dist": "3.3.4-flatly",
     "toastr": "~2.1.1",
-    "firebase": "~2.2.3"
+    "firebase": "~2.2.3",
+    "handlebars": "~3.0.0",
+    "pathjs": "https://github.com/tom-smalls/pathjs.git#57b83dd4efaff9e473e5e3eb1538c52e5c33840c",
+    "socket.io-client": "~1.3.5",
+    "easyrtc": "https://github.com/priologic/easyrtc.git#~1.0.11"
   }
 }
