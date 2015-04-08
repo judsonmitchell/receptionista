@@ -55,15 +55,16 @@ var connect = function (){
         for( var i in list ){
             console.log("easyrtcid=" + i + " belongs to user " + list[i].username);
             $('.video-start').attr('data-id', i).prop('disabled', false);
-        } 
+        }
     });
+    easyrtc.setPeerListener(setMsgs);
     easyrtc.easyApp("easyrtc.receptionistaj", "self", ["caller"], loginSuccess, loginFailure);
 
 },
 
-loginSuccess = function () {
+loginSuccess = function (easyrtcid) {
+    this.thisUser = easyrtcid;
     toastr.success('Success! Video connection made.');
-
 },
 
 loginFailure = function () {
@@ -75,14 +76,44 @@ updateStatus = function() {
 },
 
 makeCall = function(easyrtcid) {
+    this.otherUser = easyrtcid;
+    var currentUser = easyrtc.idToName(thisUser);
     easyrtc.call(easyrtcid, function success (){
         toastr.success(easyrtc.idToName(easyrtcid)  + ' is connected');
+        easyrtc.sendPeerMessage(otherUser, 'set_recptionist', {name: currentUser},
+         function () {
+            console.log('message sent');
+         },
+         function () {
+            console.log('message failed');
+         });
     }, function fail (){
         toastr.error('Failed to connect to ' +  easyrtc.idToName(easyrtcid));
     });
 
+},
 
-};
+stopVideo = function (){
+    console.log(otherUser);
+    easyrtc.clearMediaStream( document.getElementById('self'));
+    easyrtc.sendPeerMessage(otherUser, 'offer_candy', {candy_name:'mars'},
+            function(msgType, msgBody ) {
+                console.log("message was sent");
+            },
+            function(errorCode, errorText) {
+                console.log("error was " + errorText);
+            });
+},
+
+setMsgs = function (who, msgType, content) {
+    if (msgType === 'set_recptionist'){
+        $('#status').html(content.name + ' is on the desk');
+    }
+    console.log(who);
+    console.log(msgType);
+    console.log(content);
+}
+
 /* Paths */
 
 Path.before('#/main/', function () {
@@ -103,14 +134,14 @@ Path.map('#/main/index').to(function() {
     setNav(0)
 });
 
-Path.map('#/main/desk').to(function() {
-    $('.content').html(Handlebars.templates.desk);
+Path.map('#/main/reception').to(function() {
+    $('.content').html(Handlebars.templates.recep);
     connect();
 });
 
-Path.map('#/main/target').to(function() {
+Path.map('#/main/desk').to(function() {
     var context = {name:'Jady', org_name:'LoyolaLawClinic' };
-    $('.content').html(Handlebars.templates.target(context));
+    $('.content').html(Handlebars.templates.desk(context));
     connect();
 });
 
