@@ -1,8 +1,8 @@
-//Login User
+/* Config */
 easyrtc.setSocketUrl('http://loyolalawtech.org:8080');
 var ref = new Firebase('https://dazzling-torch-5906.firebaseio.com'),
-stream,
 
+/* System */
 checkAuth = function () {
     var authData = ref.getAuth();
     if (authData){
@@ -42,44 +42,85 @@ logoutUser = function () {
 setNav = function (index) {
     $('ul.nav li').removeClass('active');
     $('ul.nav li').eq(index).addClass('active');
+};
+
+/* RTC */
+var connect = function (){
+
+    var userId = ref.getAuth();
+    easyrtc.setUsername(userId.password.email);
+    easyrtc.setRoomApiField("receptionista",  "favorite_alien", "Mr Spock");
+    easyrtc.setRoomOccupantListener(function(roomName, list, selfInfo){
+        console.log(roomName);
+        for( var i in list ){
+            console.log("easyrtcid=" + i + " belongs to user " + list[i].username);
+        } 
+    });
+    easyrtc.easyApp("easyrtc.receptionistaj", "self", ["caller"], loginSuccess, loginFailure);
+
 },
 
-startVideo = function () {
-    //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
-    //navigator.getUserMedia({video:true,audio:true},
-    //    function(localMediaStream){
-    //            stream = localMediaStream;
-    //            var video = document.querySelector('video');
-    //            video.src = window.URL.createObjectURL(localMediaStream);
-    //            video.onloadedmetadata = function(e) {
-    //                video.play();
-    //            };
-    //        },
-    //    function (e){
-    //        console.log('error');
-    //    });
-    //easyrtc.setRoomOccupantListener( convertListToButtons);
-    easyrtc.initMediaSource(function(){
-        var selfVideo = document.getElementById('self');
-        easyrtc.setVideoObjectSrc(selfVideo, easyrtc.getLocalStream());
-        easyrtc.connect('receptionista', 
-            function (easyrtcid){
-                console.log('success: ' + easyrtcid); 
-            },
-            function(errorCode,msg){
-                console.log('fail: ' + msg);
-            });
-        }
-    );
+loginSuccess = function () {
+    toastr.success('Success! Video connection made.');
+
 },
 
-stopVideo = function () {
-    //stream.stop();
-    easyrtc.clearMediaStream( document.getElementById('self'));
-    easyrtc.setVideoObjectSrc(document.getElementById('self'),'');
-    easyrtc.closeLocalMediaStream();
+loginFailure = function () {
+    toastr.error('Sorry! Couldn\'t log in to video server.');
+},
 
-}
+updateStatus = function() {
+
+
+
+};
+//startVideo = function (role) {
+//    if (role === 'target'){ //the machine on the desk
+//        var uniqId = (0|Math.random()*9e6).toString(36);
+//        var userId = ref.getAuth();
+//        var dateStamp = new Date().toString();
+//        //add unique room id to firebase
+//        ref.child('receptionista/sessions').push({
+//            sessId : uniqId,
+//            startedOn : dateStamp,
+//            startedBy : userId.password.email,
+//            sessStatus : 'active'
+//        }, function (error){
+//            if (error){
+//                console.log('error logging'); 
+//            } else {
+//                console.log('successfully logged session');
+//            }
+//        });
+//
+//    } else {
+//        //we are loggin in to watch the desk
+//        ref.child('receptionista//sessions').on('value', function(snap){
+//            snap.val();
+//        });
+//    }
+//    easyrtc.initMediaSource(function(){
+//        var selfVideo = document.getElementById('self');
+//        easyrtc.setVideoObjectSrc(selfVideo, easyrtc.getLocalStream());
+//        easyrtc.connect(uniqId, 
+//            function (easyrtcid){
+//                console.log('success: ' + easyrtcid); 
+//            },
+//            function(errorCode,msg){
+//                console.log('fail: ' + msg);
+//            });
+//        }
+//    );
+//},
+//
+//stopVideo = function () {
+//    easyrtc.clearMediaStream( document.getElementById('self'));
+//    easyrtc.setVideoObjectSrc(document.getElementById('self'),'');
+//    easyrtc.closeLocalMediaStream();
+//
+//}
+
+/* Paths */
 
 Path.before('#/main/', function () {
     var authData = ref.getAuth();
@@ -101,13 +142,13 @@ Path.map('#/main/index').to(function() {
 
 Path.map('#/main/desk').to(function() {
     $('.content').html(Handlebars.templates.desk);
-    startVideo();
+    connect();
 });
 
 Path.map('#/main/target').to(function() {
     var context = {name:'Jady', org_name:'LoyolaLawClinic' };
     $('.content').html(Handlebars.templates.target(context));
-    startVideo();
+    connect();
 });
 
 Path.map('#/login').to(function() {
@@ -144,11 +185,17 @@ Path.rescue(function () {
 
 Path.listen();
 
+/* Listeners */
+
 $('.content').on('submit', '#login', function(e) {
     e. preventDefault();
     loginUser($('#inputEmail3').val(), $('#inputPassword3').val());
 });
 
+$('.content').on('click', '.video-start', function(e) {
+    console.log('clicked start video');
+    makeCall();
+});
 $('.content').on('click', '.video-stop', function(e) {
     console.log('clicked stop video');
     stopVideo();
