@@ -54,6 +54,7 @@ var connect = function (){
         console.log(roomName);
         for( var i in list ){
             console.log("easyrtcid=" + i + " belongs to user " + list[i].username);
+            $('.video-start').attr('data-id', i).prop('disabled', false);
         } 
     });
     easyrtc.easyApp("easyrtc.receptionistaj", "self", ["caller"], loginSuccess, loginFailure);
@@ -71,55 +72,17 @@ loginFailure = function () {
 
 updateStatus = function() {
 
+},
+
+makeCall = function(easyrtcid) {
+    easyrtc.call(easyrtcid, function success (){
+        toastr.success(easyrtc.idToName(easyrtcid)  + ' is connected');
+    }, function fail (){
+        toastr.error('Failed to connect to ' +  easyrtc.idToName(easyrtcid));
+    });
 
 
 };
-//startVideo = function (role) {
-//    if (role === 'target'){ //the machine on the desk
-//        var uniqId = (0|Math.random()*9e6).toString(36);
-//        var userId = ref.getAuth();
-//        var dateStamp = new Date().toString();
-//        //add unique room id to firebase
-//        ref.child('receptionista/sessions').push({
-//            sessId : uniqId,
-//            startedOn : dateStamp,
-//            startedBy : userId.password.email,
-//            sessStatus : 'active'
-//        }, function (error){
-//            if (error){
-//                console.log('error logging'); 
-//            } else {
-//                console.log('successfully logged session');
-//            }
-//        });
-//
-//    } else {
-//        //we are loggin in to watch the desk
-//        ref.child('receptionista//sessions').on('value', function(snap){
-//            snap.val();
-//        });
-//    }
-//    easyrtc.initMediaSource(function(){
-//        var selfVideo = document.getElementById('self');
-//        easyrtc.setVideoObjectSrc(selfVideo, easyrtc.getLocalStream());
-//        easyrtc.connect(uniqId, 
-//            function (easyrtcid){
-//                console.log('success: ' + easyrtcid); 
-//            },
-//            function(errorCode,msg){
-//                console.log('fail: ' + msg);
-//            });
-//        }
-//    );
-//},
-//
-//stopVideo = function () {
-//    easyrtc.clearMediaStream( document.getElementById('self'));
-//    easyrtc.setVideoObjectSrc(document.getElementById('self'),'');
-//    easyrtc.closeLocalMediaStream();
-//
-//}
-
 /* Paths */
 
 Path.before('#/main/', function () {
@@ -194,7 +157,7 @@ $('.content').on('submit', '#login', function(e) {
 
 $('.content').on('click', '.video-start', function(e) {
     console.log('clicked start video');
-    makeCall();
+    makeCall($(this).data('id'));
 });
 $('.content').on('click', '.video-stop', function(e) {
     console.log('clicked stop video');
