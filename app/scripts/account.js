@@ -2,6 +2,8 @@
  *Handles new account creation
  */
 
+var dataUrl;
+
 function userInfo (credentials) {
     ref.authWithPassword(credentials, function (error, authData) {
         if (error){
@@ -13,17 +15,27 @@ function userInfo (credentials) {
                 username: authData.password.email.replace(/@.*/, ''),
                 fname: $('#f_name').val(),
                 lname: $('#l_name').val(),
-                approved: false
+                photo: dataUrl,
+                approved: false,
+                admin: false
+            }, function (error){
+                if (error){
+                    toastr.error('Sorry, account creation failed!');
+                } else {
+                    $('.content').html(Handlebars.templates.account_confirm);
+                }
+            
             });
         }
     });
 }
 
+
 $('#photo').on('change', function (e){
 
     var fileInfo = $(this).prop('files')[0];
-    if (fileInfo.size > 1024 * 1024 * 10){
-        toastr.error('Sorry, that file is greater than 10MB');
+    if (fileInfo.size > 1024 * 1024 * 5){
+        toastr.error('Sorry, that file is greater than 5MB');
         return;
     }
 
@@ -31,6 +43,15 @@ $('#photo').on('change', function (e){
         toastr.error('Sorry, file must be either jpg or png.');
         return;
     }
+
+    var input = e.target;
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        dataUrl = reader.result;
+
+    };
+    reader.readAsDataURL(input.files[0]);
+
 });
 
 $('#new-account').on('submit', function (e) {
@@ -50,3 +71,4 @@ $('#new-account').on('submit', function (e) {
         }
     });
 });
+
