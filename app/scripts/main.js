@@ -1,6 +1,6 @@
 /* Config */
 easyrtc.setSocketUrl('http://loyolalawtech.org:8080');
-var ref = new Firebase('https://dazzling-torch-5906.firebaseio.com'),
+var ref = new Firebase('https://dazzling-torch-5906.firebaseio.com/receptionista'),
 
 /* System */
 checkAuth = function () {
@@ -49,16 +49,16 @@ var connect = function (){
 
     var userId = ref.getAuth();
     easyrtc.setUsername(userId.password.email);
-    easyrtc.setRoomApiField("receptionista",  "favorite_alien", "Mr Spock");
+    easyrtc.setRoomApiField('receptionista',  'favorite_alien', 'Mr Spock');
     easyrtc.setRoomOccupantListener(function(roomName, list, selfInfo){
         console.log(roomName);
         for( var i in list ){
-            console.log("easyrtcid=" + i + " belongs to user " + list[i].username);
+            console.log('easyrtcid=' + i + ' belongs to user ' + list[i].username);
             $('.video-start').attr('data-id', i).prop('disabled', false);
         }
     });
     easyrtc.setPeerListener(setMsgs);
-    easyrtc.easyApp("easyrtc.receptionistaj", "self", ["caller"], loginSuccess, loginFailure);
+    easyrtc.easyApp('easyrtc.receptionistaj', 'self', ['caller'], loginSuccess, loginFailure);
 
 },
 
@@ -83,10 +83,10 @@ makeCall = function(easyrtcid) {
         easyrtc.sendPeerMessage(otherUser, 'set_recptionist', {name: currentUser},
          function () {
             console.log('message sent');
-         },
+        },
          function () {
             console.log('message failed');
-         });
+        });
     }, function fail (){
         toastr.error('Failed to connect to ' +  easyrtc.idToName(easyrtcid));
     });
@@ -98,10 +98,10 @@ stopVideo = function (){
     easyrtc.clearMediaStream( document.getElementById('self'));
     easyrtc.sendPeerMessage(otherUser, 'offer_candy', {candy_name:'mars'},
             function(msgType, msgBody ) {
-                console.log("message was sent");
+                console.log('message was sent');
             },
             function(errorCode, errorText) {
-                console.log("error was " + errorText);
+                console.log('error was ' + errorText);
             });
 },
 
@@ -112,7 +112,7 @@ setMsgs = function (who, msgType, content) {
     console.log(who);
     console.log(msgType);
     console.log(content);
-}
+};
 
 /* Paths */
 
@@ -131,7 +131,7 @@ Path.map('#/main/index').to(function() {
 })
 .enter(function() {
     $('#logout').show();
-    setNav(0)
+    setNav(0);
 });
 
 Path.map('#/main/reception').to(function() {
@@ -164,8 +164,8 @@ Path.map('#/about').to(function() {
     setNav(1);
 });
 
-Path.map('#/contact').to(function() {
-    $('.content').html(Handlebars.templates.contact);
+Path.map('#/account').to(function() {
+    $('.content').html(Handlebars.templates.account);
 })
 .enter(function(){
     setNav(2);
