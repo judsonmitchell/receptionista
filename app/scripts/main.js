@@ -26,8 +26,18 @@ loginUser = function (user,pwd) {
             if (!$('#remember').prop('checked')){
                 remember: 'sessionOnly'
             }
-            //$('.content').html(Handlebars.templates.index);
-            location.href = '#/main/index';
+            ref.child('users').child(authData.uid).once('value', function (snap){
+                var profileData = snap.val();
+                console.log(profileData.fname);
+                console.log(profileData.approved);
+                if (profileData.approved){
+                    //$('.content').html(Handlebars.templates.index);
+                    location.href = '#/main/index';
+                } else {
+                    toastr.error('Sorry! Your adminstrator has not approved your account.');
+                }
+            });
+
         }
     });
 
