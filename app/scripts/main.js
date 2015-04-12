@@ -6,7 +6,6 @@ var ref = new Firebase('https://dazzling-torch-5906.firebaseio.com/receptionista
 checkAuth = function () {
     var authData = ref.getAuth();
     if (authData){
-        console.log('logged in user');
         return true;
     } else {
         return false;
@@ -26,26 +25,30 @@ loginUser = function (user,pwd) {
             if (!$('#remember').prop('checked')){
                 remember: 'sessionOnly'
             }
-            ref.child('users').child(authData.uid).once('value', function (snap){
-                var profileData = snap.val();
-                console.log(profileData.fname);
-                console.log(profileData.approved);
-                if (profileData.approved){
-                    //$('.content').html(Handlebars.templates.index);
-                    location.href = '#/main/index';
-                } else {
-                    toastr.error('Sorry! Your adminstrator has not approved your account.');
-                }
-            });
-
+            location.href = '#/main/index';
         }
     });
 
 },
 
+getProfile = function (cb) {
+    var authData = ref.getAuth();
+    if (authData){
+        ref.child('users').child(authData.uid).once('value', function (snap){
+            if (snap){
+                var profileData = snap.val();
+                cb(profileData);
+            } else {
+                return false;
+            }
+        });
+    } else {
+        cb(null);
+    }
+},
+
 logoutUser = function () {
     ref.unauth();
-    //$('.content').html(Handlebars.templates.login);
     location.href = '#/login';
 },
 
@@ -137,7 +140,16 @@ Path.before('#/main/', function () {
 });
 
 Path.map('#/main/index').to(function() {
-    $('.content').html(Handlebars.templates.index);
+    getProfile(
+        function (userData){
+            if (userData){
+                $('.content').html(Handlebars.templates.index(userData));
+            } else {
+                toastr.error('Sorry! Your adminstrator has not yet approved your account.');
+            }
+        }
+    
+    );
 })
 .enter(function() {
     $('#logout').show();
@@ -175,7 +187,16 @@ Path.map('#/about').to(function() {
 });
 
 Path.map('#/account').to(function() {
-    $('.content').html(Handlebars.templates.account);
+    getProfile(
+        function (userData){
+            if (userData){
+                $('.content').html(Handlebars.templates.account_edit(userData));
+            } else {
+                $('.content').html(Handlebars.templates.account);
+            }
+        }
+    
+    );
 })
 .enter(function(){
     setNav(2);
@@ -183,7 +204,6 @@ Path.map('#/account').to(function() {
 Path.root('#/login');
 
 Path.rescue(function () {
-    //$('.content').html(Handlebars.templates.login);
     location.href = '#/login';
 });
 

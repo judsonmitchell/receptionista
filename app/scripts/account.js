@@ -31,7 +31,7 @@ function userInfo (credentials) {
 }
 
 
-$('#photo').on('change', function (e){
+$('.container').on('change', '#photo', function (e){
 
     var fileInfo = $(this).prop('files')[0];
     if (fileInfo.size > 1024 * 1024 * 5){
@@ -48,13 +48,15 @@ $('#photo').on('change', function (e){
     var reader = new FileReader();
     reader.onload = function (e) {
         dataUrl = reader.result;
-
+        $('#old-photo').val('');
+        $('#photo-preview').attr('src',dataUrl);
     };
     reader.readAsDataURL(input.files[0]);
-
+    $('#old-photo').val('');
+    $('#photo-preview').attr('src',dataUrl);
 });
 
-$('#new-account').on('submit', function (e) {
+$('.content').on('submit', '#new-account', function (e) {
     e.preventDefault();
     var emailAddress = $('#email').val();
     var pword = $('#password').val();
@@ -72,3 +74,26 @@ $('#new-account').on('submit', function (e) {
     });
 });
 
+$('.content').on('submit', '#edit-account', function (e) {
+    e.preventDefault();
+    var authData = ref.getAuth();
+    var currentPhoto;
+    if (dataUrl){
+        currentPhoto = dataUrl;
+    } else {
+        currentPhoto = $('#old-photo').val();
+    }
+    ref.child('users').child(authData.uid).update({
+        fname : $('#f_name').val(),
+        lname : $('#l_name').val(),
+        photo: currentPhoto
+    }, function (error){
+        if (error){
+            toastr.error('Sorry, there was an error editing your account');
+            console.log(error);
+        } else {
+            toastr.success('Success! Account modified');
+        }
+    
+    });
+});

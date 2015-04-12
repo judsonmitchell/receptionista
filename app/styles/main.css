@@ -87,3 +87,8 @@ body {
     border-bottom: 0;
   }
 }
+
+.thumb {
+    height: 50px;
+    width: auto;
+}
